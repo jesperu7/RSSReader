@@ -13,8 +13,7 @@ public class newsItem {
         return mHeadline;
     }
 
-    public void setmHeadline(String h){
-        TextView textView = textView.findViewById();
-        textView.setText(h);
+    public void setmHeadline(String h) {
+        mHeadline = h;
     }
 }

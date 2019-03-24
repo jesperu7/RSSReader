@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
                 for (int i = 0; i < (itemLimit * 2); i+=2){           //Går gjennom array med RSS og skriver ut titler (annenhver, derfor +=2)
                     newsList.add(new newsItem(strArray[i]));
+                    //newsItem.setmHeadline();
                 }
 
                 buildRecyclerView();
@@ -86,13 +87,13 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(int position) {
 
                 String hardkode = "<![CDATA[Cruise ship evacuating off Norway coast]]>";     //hard koda inn en title fra RSS feed, her må det egentlig sendes med den tittelen brukeren trykker på
-                String link = newsItem.getmHeadline();
-
+                // String link = newsItem.getmHeadline();
+                // funket ikke så bruker hardkodet eksempel
 
                 for (int i = 0; i < strArray.length; i++){          //går gjennom array og skriver ut link til tittelen brukeren har valgt
-                    if (strArray[i].equals(link)){
+                    if (strArray[i].equals(hardkode)){
                         System.out.println(strArray[i+1]);
-                        openContent(link);
+                        openContent(hardkode);
                     }
                 }
 
