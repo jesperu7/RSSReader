@@ -19,13 +19,17 @@ import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
     public static final int RESULT_CODE = 0;
+    public String NEWSLINK = "news_link";
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private NewsAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private Button button;
     private int refreshRate;
     private int itemLimit = 5;
     private String inputURL = "http://rss.cnn.com/rss/edition.rss";
+
+    private String strArray[] = readRSS(inputURL).split("\n");  //Lagrer RSS feed i en array, kan splite på \n siden jeg legger inn det etter hver som blir lest i readRSS
+    private ArrayList<newsItem> newsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,29 +42,12 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        ArrayList<newsItem> newsList = new ArrayList<>();
-
-        String strArray[] = readRSS(inputURL).split("\n");  //Lagrer RSS feed i en array, kan splite på \n siden jeg legger inn det etter hver som blir lest i readRSS
 
         for (int i = 0; i < (itemLimit * 2); i+=2){           //Går gjennom array med RSS og skriver ut titler (annenhver, derfor +=2)
             newsList.add(new newsItem(strArray[i]));
         }
 
-        String hardkode = "<![CDATA[Cruise ship evacuating off Norway coast]]>";     //hard koda inn en title fra RSS feed, her må det egentlig sendes med den tittelen brukeren trykker på
-
-        for (int i = 0; i < strArray.length; i++){          //går gjennom array og skriver ut link til tittelen brukeren har valgt (hardkoda med her).
-            if (strArray[i].equals(hardkode)){
-                System.out.println(strArray[i+1]);
-            }
-        }
-
-        mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.setHasFixedSize(false);
-        mLayoutManager = new LinearLayoutManager(this);
-        mAdapter = new NewsAdapter(newsList);
-
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
+       buildRecyclerView();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -75,36 +62,45 @@ public class MainActivity extends AppCompatActivity {
                 itemLimit = Integer.parseInt(bundle.get(PreferenceActivity.LIMIT).toString());
                 inputURL = bundle.get(PreferenceActivity.URL).toString();
 
-                ArrayList<newsItem> newsList = new ArrayList<>();
-
-                String strArray[] = readRSS(inputURL).split("\n");  //Lagrer RSS feed i en array, kan splite på \n siden jeg legger inn det etter hver som blir lest i readRSS
-
                 for (int i = 0; i < (itemLimit * 2); i+=2){           //Går gjennom array med RSS og skriver ut titler (annenhver, derfor +=2)
                     newsList.add(new newsItem(strArray[i]));
                 }
 
-                String hardkode = "<![CDATA[Cruise ship evacuating off Norway coast]]>";     //hard koda inn en title fra RSS feed, her må det egentlig sendes med den tittelen brukeren trykker på
+                buildRecyclerView();
 
-                for (int i = 0; i < strArray.length; i++){          //går gjennom array og skriver ut link til tittelen brukeren har valgt (hardkoda med her).
-                    if (strArray[i].equals(hardkode)){
+            }
+        }
+    }
+
+    public void buildRecyclerView() {
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setHasFixedSize(false);
+        mLayoutManager = new LinearLayoutManager(this);
+        mAdapter = new NewsAdapter(newsList);
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+
+        mAdapter.setOnItemClickListener(new NewsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+
+                String hardkode = "<![CDATA[Cruise ship evacuating off Norway coast]]>";     //hard koda inn en title fra RSS feed, her må det egentlig sendes med den tittelen brukeren trykker på
+                String link = newsItem.getmHeadline();
+
+
+                for (int i = 0; i < strArray.length; i++){          //går gjennom array og skriver ut link til tittelen brukeren har valgt
+                    if (strArray[i].equals(link)){
                         System.out.println(strArray[i+1]);
+                        openContent(link);
                     }
                 }
-
-                mRecyclerView = findViewById(R.id.recyclerView);
-                mRecyclerView.setHasFixedSize(false);
-                mLayoutManager = new LinearLayoutManager(this);
-                mAdapter = new NewsAdapter(newsList);
-
-                mRecyclerView.setLayoutManager(mLayoutManager);
-                mRecyclerView.setAdapter(mAdapter);
-
-
 
 
 
             }
-        }
+        });
+
     }
 
     public static String readRSS(String urlAdress){        //Funksjonen som skriver inn title og link fra RSS feed til en string.
@@ -142,6 +138,15 @@ public class MainActivity extends AppCompatActivity {
     public void openPreferences() {
         Intent intent = new Intent(this, PreferenceActivity.class);
         startActivityForResult(intent,RESULT_CODE);
+    }
+
+    public void openContent(String link){
+        Intent intent = new Intent(this, ContentActivity.class);
+        Bundle b = new Bundle();
+
+        b.putString(NEWSLINK, link);
+
+        startActivity(intent);
     }
 
 }
